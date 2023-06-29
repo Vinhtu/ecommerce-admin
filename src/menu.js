@@ -150,6 +150,12 @@ export const demoPages = {
 				text: 'Extend Product',
 				path: 'admin/product/extend',
 				icon: 'ViewArray',
+			},
+			utils_product: {
+				id: 'utils-product',
+				text: 'Utils Product',
+				path: 'admin/product/utils',
+				icon: 'ViewArray',
 			}
 		},
 	},

@@ -114,12 +114,12 @@ const BrandComponent = ({ isFluid }) => {
 		setOpenEditBrand(true);
 	};
 	const handleEditForm = (event) => {
-		setDataForm({ ...dataform, [event.target.id]: event.target.value });
+		setDataFormEdit({ ...dataformedit, [event.target.id]: event.target.value });
 	};
 
 	const openDeleteBrand = (item) => {
-		setDataForm({
-			...dataform,
+		setDataFormEdit({
+			...dataformedit,
 			_id: item._id,
 			category: item.category,
 			subcategory: item.subcategory,
@@ -664,7 +664,7 @@ const BrandComponent = ({ isFluid }) => {
 							<FormGroup id='create_date' label='Create Date'>
 								<Input
 									onChange={handleEditForm}
-									value={dataform.create_date}
+									value={dataformedit.create_date}
 									type='date'
 									disabled
 								/>
@@ -672,7 +672,7 @@ const BrandComponent = ({ isFluid }) => {
 						</div>
 						<div className='col-12'>
 							<FormGroup id='name' label='Name'>
-								<Input onChange={handleEditForm} value={dataform.name} disabled />
+								<Input onChange={handleEditForm} value={dataformedit.name} disabled />
 							</FormGroup>
 						</div>
 					</div>

@@ -26,6 +26,8 @@ const LIST = {
 	// CATEGORY: lazy(() => import('../pages/presentation/demo-pages/CategoryPage')),
 	EXTENDPRODUCTPAGE: lazy(() => import('../pages/presentation/demo-pages/ExtendProductPage')),
 
+	UTILSPRODUCT: lazy(() => import('../pages/presentation/demo-pages/UtilsProduct')),
+
 	BANNER: lazy(() => import('../pages/presentation/demo-pages/BannerPage')),
 	EVENT: lazy(() => import('../pages/presentation/demo-pages/EventPage')),
 
@@ -60,18 +62,18 @@ const AUTH = {
 	PAGE_404: lazy(() => import('../pages/presentation/auth/Page404')),
 };
 const APP = {
-// 	// PROJECT_MANAGEMENT: {
-// 	// 	PROJECTS_LIST: lazy(() =>
-// 	// 		import('../pages/presentation/project-management/ProjectManagementsList'),
-// 	// 	),
-// 	// 	PROJECT: lazy(() =>
-// 	// 		import('../pages/presentation/project-management/ProjectManagementsProject'),
-// 	// 	),
-// 	// },
-// 	// KNOWLEDGE: {
-// 	// 	GRID: lazy(() => import('../pages/presentation/knowledge/KnowledgeGridPage')),
-// 	// 	VIEW: lazy(() => import('../pages/presentation/knowledge/KnowledgeViewPage')),
-// 	// },
+	// 	// PROJECT_MANAGEMENT: {
+	// 	// 	PROJECTS_LIST: lazy(() =>
+	// 	// 		import('../pages/presentation/project-management/ProjectManagementsList'),
+	// 	// 	),
+	// 	// 	PROJECT: lazy(() =>
+	// 	// 		import('../pages/presentation/project-management/ProjectManagementsProject'),
+	// 	// 	),
+	// 	// },
+	// 	// KNOWLEDGE: {
+	// 	// 	GRID: lazy(() => import('../pages/presentation/knowledge/KnowledgeGridPage')),
+	// 	// 	VIEW: lazy(() => import('../pages/presentation/knowledge/KnowledgeViewPage')),
+	// 	// },
 	SALES: {
 		TRANSACTIONS: lazy(() => import('../pages/presentation/sales/TransActionsPage')),
 		PRODUCTS: lazy(() => import('../pages/presentation/sales/SalesListPage')),
@@ -94,7 +96,6 @@ const APP = {
 		NEWORDER: lazy(() => import('../pages/presentation/sales/NewOrder')),
 		VIEWORDER: lazy(() => import('../pages/presentation/sales/ViewOrder')),
 		EDITORDER: lazy(() => import('../pages/presentation/sales/EditOrder')),
-
 	},
 	APPOINTMENT: {
 		CALENDAR: lazy(() => import('../pages/presentation/appointment/CalendarPage')),
@@ -102,21 +103,21 @@ const APP = {
 		EMPLOYEE_VIEW: lazy(() => import('../pages/presentation/appointment/EmployeePage')),
 		APPOINTMENT_LIST: lazy(() => import('../pages/presentation/appointment/AppointmentList')),
 	},
- CRM: {
- 	CRM_DASHBOARD: lazy(() => import('../pages/presentation/crm/CrmDashboard')),
-    CUSTOMERS: lazy(() => import('../pages/presentation/crm/CustomersList')),
- 	CUSTOMER: lazy(() => import('../pages/presentation/crm/Customer')),
-	VIEWACCOUNTCUSTOMOR: lazy(() => import('../pages/presentation/crm/ViewAccountCustomor')),
- 	VIEWACCOUNTREMEMBER: lazy(() => import('../pages/presentation/crm/ViewAccountRemember')),
- 	NEWACCOUNTCUSTOMOR: lazy(() => import('../pages/presentation/crm/NewAccountCustomor')),
- 	NEWACCOUNTREMEMBER: lazy(() => import('../pages/presentation/crm/NewAccountRemember')),
- 	SALES: lazy(() => import('../pages/presentation/crm/Sales')),
- 	// INVOICE: lazy(() => import('../pages/presentation/crm/Invoice')),
-},
-// 	// CHAT: {
-// 	// 	WITH_LIST: lazy(() => import('../pages/presentation/chat/WithListChatPage')),
-// 	// 	ONLY_LIST: lazy(() => import('../pages/presentation/chat/OnlyListChatPage')),
-// 	// },
+	CRM: {
+		CRM_DASHBOARD: lazy(() => import('../pages/presentation/crm/CrmDashboard')),
+		CUSTOMERS: lazy(() => import('../pages/presentation/crm/CustomersList')),
+		CUSTOMER: lazy(() => import('../pages/presentation/crm/Customer')),
+		VIEWACCOUNTCUSTOMOR: lazy(() => import('../pages/presentation/crm/ViewAccountCustomor')),
+		VIEWACCOUNTREMEMBER: lazy(() => import('../pages/presentation/crm/ViewAccountRemember')),
+		NEWACCOUNTCUSTOMOR: lazy(() => import('../pages/presentation/crm/NewAccountCustomor')),
+		NEWACCOUNTREMEMBER: lazy(() => import('../pages/presentation/crm/NewAccountRemember')),
+		SALES: lazy(() => import('../pages/presentation/crm/Sales')),
+		// INVOICE: lazy(() => import('../pages/presentation/crm/Invoice')),
+	},
+	// 	// CHAT: {
+	// 	// 	WITH_LIST: lazy(() => import('../pages/presentation/chat/WithListChatPage')),
+	// 	// 	ONLY_LIST: lazy(() => import('../pages/presentation/chat/OnlyListChatPage')),
+	// 	// },
 };
 const PAGE_LAYOUTS = {
 	HEADER_SUBHEADER: lazy(() => import('../pages/presentation/page-layouts/HeaderAndSubheader')),
@@ -226,7 +227,7 @@ const presentation = [
 	/**
 	 * Landing
 	 */
-	
+
 	{
 		path: dashboardMenu.dashboardTeam.path,
 		element: <LANDING.DASHBOARDTEAM />,
@@ -292,7 +293,7 @@ const presentation = [
 		element: <LIST.EVENT />,
 		exact: true,
 	},
-	 {
+	{
 		path: demoPages.Accounts.subMenu.customor.path,
 		element: <LIST.ACCOUNTCUSTOMER />,
 		exact: true,
@@ -324,6 +325,11 @@ const presentation = [
 		exact: true,
 	},
 	{
+		path: demoPages.Products.subMenu.utils_product.path,
+		element: <LIST.UTILSPRODUCT />,
+		exact: true,
+	},
+	{
 		path: demoPages.Orders.subMenu.order_shop.path,
 		element: <LIST.ORDERSHOP />,
 		exact: true,
@@ -333,11 +339,6 @@ const presentation = [
 		element: <LIST.ORDERAFFILATE />,
 		exact: true,
 	},
-
-
-
-
-
 
 	{
 		path: demoPages.Affilateshop.path,
@@ -369,8 +370,6 @@ const presentation = [
 		exact: true,
 	},
 
-
-
 	{
 		path: demoPages.Login.path,
 		element: <LIST.AUTHLOGIN />,
@@ -381,15 +380,6 @@ const presentation = [
 		element: <LIST.AUTHLOGOUT />,
 		exact: true,
 	},
-
-
-
-
-
-
-
-
-
 
 	// {
 	// 	path: demoPages.listPages.subMenu.listBoxed.path,
@@ -556,10 +546,6 @@ const presentation = [
 		exact: true,
 	},
 
-	
-
-
-
 	{
 		path: demoPages.sales.subMenu.newvoucher.path,
 		element: <APP.SALES.NEWVOUCHER />,
@@ -576,7 +562,6 @@ const presentation = [
 		exact: true,
 	},
 
-
 	{
 		path: demoPages.sales.subMenu.newevent.path,
 		element: <APP.SALES.NEWEVENT />,
@@ -592,7 +577,6 @@ const presentation = [
 		element: <APP.SALES.VIEWEVENT />,
 		exact: true,
 	},
-
 
 	{
 		path: `${demoPages.sales.subMenu.productID.path}/:id`,
@@ -637,7 +621,7 @@ const presentation = [
 	/**
 	 * App > CRM
 	 */
-	
+
 	{
 		path: demoPages.crm.subMenu.customersList.path,
 		element: <APP.CRM.CUSTOMERS />,
@@ -683,7 +667,6 @@ const presentation = [
 	// 	exact: true,
 	// },
 
-	
 	/**
 	 * END - App
 	 */

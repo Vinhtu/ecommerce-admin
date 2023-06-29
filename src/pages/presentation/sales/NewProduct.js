@@ -43,6 +43,21 @@ import { GetAffilateshops } from '../../../redux/actions/affilateshops';
 import Icon from '../../../components/icon/Icon';
 import Textarea from '../../../components/bootstrap/forms/Textarea';
 import { GetColoradmins } from '../../../redux/actions/coloradmins';
+import ConvertVND from '../../../utils/ConvertVND';
+import { GetDeliveryMethods } from '../../../redux/actions/deliverymethods';
+import { GetUsageStatuss } from '../../../redux/actions/usagestatus';
+import { GetOrigins } from '../../../redux/actions/utils/origins';
+import { GetMaterials } from '../../../redux/actions/utils/materials';
+import { GetSkinTypes } from '../../../redux/actions/utils/skintypes';
+import { GetStickerStyles } from '../../../redux/actions/utils/stickerstyles';
+
+const selectGender = [
+	{ value: 'Không chọn', text: 'Không chọn' },
+	{ value: 'Nam', text: 'Nam' },
+	{ value: 'Nữ', text: 'Nữ' },
+	{ value: 'Cả 2', text: 'Cả 2' },
+	{ value: 'Khác', text: 'Khác' },
+];
 
 const NewProduct = () => {
 	const dispatch = useDispatch();
@@ -75,9 +90,9 @@ const NewProduct = () => {
 	const [arrThumbnailChildren, setArrThumbnailChildren] = React.useState([]);
 
 	const [percentInfo1, setPercentInfo1] = React.useState(0);
+	const { deliverymethodList } = useSelector((state) => state.deliverymethod);
 
-	
-
+	const { usagestatusList } = useSelector((state) => state.usagestatus);
 
 	const today = new Date();
 	const { sizeList } = useSelector((state) => state.size);
@@ -94,8 +109,11 @@ const NewProduct = () => {
 		category: '',
 		subcategory: '',
 		affilateshop: '',
+		usagestatus: '',
+		deliverymethod: '',
 		create_date: formatdate,
 		status: 'Normal',
+		gender: '',
 	});
 
 	useEffect(() => {
@@ -104,14 +122,23 @@ const NewProduct = () => {
 		dispatch(GetBrands());
 		dispatch(GetCategorys());
 		dispatch(GetAffilateshops());
+		dispatch(GetDeliveryMethods());
+		dispatch(GetUsageStatuss());
 	}, [dispatch]);
 
 	const handleChange = (e) => {
-	    
-		if(dataform.code && dataform.name && dataform.brand && dataform.category && dataform.subcategory && dataform.affilateshop && dataform.create_date && dataform.status){
-			setPercentInfo1(100)
+		if (
+			dataform.code &&
+			dataform.name &&
+			dataform.brand &&
+			dataform.category &&
+			dataform.subcategory &&
+			dataform.affilateshop &&
+			dataform.create_date &&
+			dataform.status
+		) {
+			setPercentInfo1(100);
 		}
-
 
 		if (e.target.id === 'code') {
 			if (e.target.value.length < 25)
@@ -208,6 +235,28 @@ const NewProduct = () => {
 		{ value: 'Destroy', text: 'Destroy' },
 	];
 
+	console.log(deliverymethodList, usagestatusList, 'ddata ');
+
+	const selectUsagestatus = [];
+	if (usagestatusList) {
+		for (let i = 0; i < usagestatusList.data.results.length; i += 1) {
+			selectUsagestatus.push({
+				value: usagestatusList.data.results[i].type,
+				text: usagestatusList.data.results[i].type,
+			});
+		}
+	}
+
+	const selectDeliverymethodList = [];
+	if (deliverymethodList) {
+		for (let i = 0; i < deliverymethodList.data.results.length; i += 1) {
+			selectDeliverymethodList.push({
+				value: deliverymethodList.data.results[i].code,
+				text: deliverymethodList.data.results[i].type,
+			});
+		}
+	}
+
 	// const deletePositionColor = (name) => {
 	// 	setArrColors(arrColors.filter((items) => items.name !== name));
 	// };
@@ -237,39 +286,51 @@ const NewProduct = () => {
 	};
 
 	const addArrSizePrice = () => {
-		setArrSizePriceVitural((current) => [
-			...current,
-			{
-				name: sizeVitural,
-				price: priceSizeVitural,
-				p_price: priceSizePromotionVitural,
-				amount: amountVitural,
-			},
-		]);
-		setSizeVitural('');
-		setPriceSizeVitural('');
-		setPriceSizePromotionVitural('');
+		if (
+			sizeVitural &&
+			priceSizeVitural &&
+			priceSizePromotionVitural &&
+			amountVitural &&
+			!arrSizePriceVitural.filter((item) => item.name.includes(sizeVitural)).length > 0
+		) {
+			setArrSizePriceVitural((current) => [
+				...current,
+				{
+					name: sizeVitural,
+					price: priceSizeVitural,
+					p_price: priceSizePromotionVitural,
+					amount: amountVitural,
+				},
+			]);
+			setSizeVitural('');
+			setPriceSizeVitural('');
+			setPriceSizePromotionVitural('');
+		}
 	};
 
 	const deleteArrSizePriceVitural = (data) => {
 		setArrSizePriceVitural(arrSizePriceVitural.filter((items) => items.name !== data));
 	};
 	const saveColor = () => {
-		setArrColorThumbnailSizePriceVitural((current) => [
-			...current,
-			{
-				color: colorVitural,
-				thumbnailcolor: thumbnailColorVitural,
-				sizeprice: arrSizePriceVitural,
-			},
-		]);
-		setSizeVitural('');
-		setThumbnailColorVitural('');
-		setPriceSizeVitural('');
-		setPriceSizePromotionVitural('');
-		setArrSizePriceVitural([]);
-		setAmountVitural('');
-		setIsOpenColor(false);
+		if (errorPricePromotionVitural) {
+			setErrorSaveColor('Lưu thất bại vui lòng kiểm tra thông tin');
+		} else {
+			setArrColorThumbnailSizePriceVitural((current) => [
+				...current,
+				{
+					color: colorVitural,
+					thumbnailcolor: thumbnailColorVitural,
+					sizeprice: arrSizePriceVitural,
+				},
+			]);
+			setSizeVitural('');
+			setThumbnailColorVitural('');
+			setPriceSizeVitural('');
+			setPriceSizePromotionVitural('');
+			setArrSizePriceVitural([]);
+			setAmountVitural('');
+			setIsOpenColor(false);
+		}
 	};
 	const deleteArrColor = (data) => {
 		setArrColorThumbnailSizePriceVitural(
@@ -388,8 +449,70 @@ const NewProduct = () => {
 		}
 	}, [isPostProduct, navigate]);
 
+	const [errorPricePromotionVitural, setErrorPricePromotionVitural] = React.useState(false);
+	const [errorSaveColor, setErrorSaveColor] = React.useState('');
 
+	console.log(errorPricePromotionVitural, 'errorPricePromotionVitural');
 
+	const { OriginList } = useSelector((state) => state.origin);
+	useEffect(() => {
+		dispatch(GetOrigins());
+	}, [dispatch]);
+	const selectOrigin = [];
+	if (OriginList) {
+		for (let i = 0; i < OriginList.data.results.length; i += 1) {
+			selectOrigin.push({
+				value: OriginList.data.results[i].name,
+				text: OriginList.data.results[i].name,
+			});
+		}
+	}
+
+	const { MaterialList } = useSelector((state) => state.material);
+	useEffect(() => {
+		dispatch(GetMaterials());
+	}, [dispatch]);
+
+	const selectMaterial = [];
+	if (MaterialList) {
+		for (let i = 0; i < MaterialList.data.results.length; i += 1) {
+			selectMaterial.push({
+				value: MaterialList.data.results[i].name,
+				text: MaterialList.data.results[i].name,
+			});
+		}
+	}
+
+	const { SkinTypeList } = useSelector((state) => state.material);
+	useEffect(() => {
+		dispatch(GetSkinTypes());
+	}, [dispatch]);
+
+	const selectSkinType = [];
+	if (SkinTypeList) {
+		for (let i = 0; i < SkinTypeList.data.results.length; i += 1) {
+			selectSkinType.push({
+				value: SkinTypeList.data.results[i].name,
+				text: SkinTypeList.data.results[i].name,
+			});
+		}
+	}
+
+	const { StickerStyleList } = useSelector((state) => state.stickerstyle);
+
+	useEffect(() => {
+		dispatch(GetStickerStyles());
+	}, [dispatch]);
+
+	const selectStickerType = [];
+	if (SkinTypeList) {
+		for (let i = 0; i < StickerStyleList.data.results.length; i += 1) {
+			selectStickerType.push({
+				value: StickerStyleList.data.results[i].name,
+				text: StickerStyleList.data.results[i].name,
+			});
+		}
+	}
 
 	return (
 		<PageWrapper title={demoPages.sales.subMenu.product.text}>
@@ -419,7 +542,11 @@ const NewProduct = () => {
 				{/* <div className='display-4 fw-bold py-3'>{data.name}</div> */}
 				<div className='row g-4'>
 					<div style={{ fontSize: 20, fontWeight: '500', marginBottom: 30 }}>
-						Thông tin cơ bản <span style={{color: percentInfo1 === 100 ? "green" : "black"}}> {percentInfo1}%</span> 
+						Thông tin cơ bản{' '}
+						<span style={{ color: percentInfo1 === 100 ? 'green' : 'black' }}>
+							{' '}
+							{percentInfo1}%
+						</span>
 					</div>
 
 					<div className='col-md-6'>
@@ -440,7 +567,7 @@ const NewProduct = () => {
 											justifyContent: 'center',
 											alignItems: 'center',
 											borderWidth: thumbnailMain ? 0 : 1,
-											borderStyle: 'dashed',
+											borderStyle: thumbnailMain ? 'none' : 'dashed',
 											borderColor: '#E9E5E5',
 											backgroundImage: `url(${thumbnailMain}`,
 											backgroundSize: '100% 100%',
@@ -693,10 +820,584 @@ const NewProduct = () => {
 						style={{
 							fontSize: 20,
 							fontWeight: '500',
-							marginBottom: 30,
-							marginTop: 20,
+							marginTop: 40,
 						}}>
 						Thông tin chi tiết
+					</div>
+
+					<div
+						style={{
+							fontSize: 20,
+							fontWeight: '500',
+							marginTop: 40,
+						}}>
+						Giày
+					</div>
+
+					<div className='row g-4 col-md-12'>
+						<FormGroup id='origin' label='Xuất xứ' className='col-md-6'>
+							<Select
+								ariaLabel='origin'
+								placeholder='Chọn xuất xứ'
+								list={selectOrigin}
+								onChange={handleChange}
+								value={dataform.origin}
+								isValid={dataform.origin}
+								isTouched={dataform.origin}
+							/>
+						</FormGroup>
+						<FormGroup id='material' label='Chất liệu' className='col-md-6'>
+							<Select
+								ariaLabel='material'
+								placeholder='Chọn Chất liệu'
+								list={selectMaterial}
+								onChange={handleChange}
+								value={dataform.material}
+								isValid={dataform.material}
+								isTouched={dataform.material}
+							/>
+						</FormGroup>
+						<FormGroup id='skintype' label='Loại Da' className='col-md-6'>
+							<Select
+								ariaLabel='skintype'
+								placeholder='Chọn Loại Da'
+								list={selectSkinType}
+								onChange={handleChange}
+								value={dataform.skintype}
+								isValid={dataform.skintype}
+								isTouched={dataform.skintype}
+							/>
+						</FormGroup>
+						<FormGroup id='gender' label='Giới tính' className='col-md-6'>
+							<Select
+								ariaLabel='gender'
+								placeholder='Chọn Giới tính'
+								list={selectGender}
+								onChange={handleChange}
+								value={dataform.gender}
+								isValid={dataform.gender}
+								isTouched={dataform.gender}
+							/>
+						</FormGroup>
+						<FormGroup id='stickerstyle' label='Kiểu dán' className='col-md-6'>
+							<Select
+								ariaLabel='stickerstyle'
+								placeholder='Chọn Kiểu dán'
+								list={selectStickerType}
+								onChange={handleChange}
+								value={dataform.stickerstyle}
+								isValid={dataform.stickerstyle}
+								isTouched={dataform.stickerstyle}
+							/>{' '}
+						</FormGroup>
+					</div>
+
+					<div
+						style={{
+							fontSize: 20,
+							fontWeight: '500',
+							marginTop: 40,
+						}}>
+						Điện thoại
+					</div>
+
+					<div className='row g-4 col-md-12'>
+						<FormGroup id='origin' label='Xuất xứ' className='col-md-6'>
+							<Select
+								ariaLabel='origin'
+								placeholder='Chọn xuất xứ'
+								list={selectOrigin}
+								onChange={handleChange}
+								value={dataform.origin}
+								isValid={dataform.origin}
+								isTouched={dataform.origin}
+							/>
+						</FormGroup>
+						<FormGroup
+							id='storagecapacity'
+							label='Dung lượng lưu trữ'
+							className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.storagecapacity} />
+						</FormGroup>
+						<FormGroup
+							id='batterycapacity'
+							label='Dung lượng pin (mhm, cell, Wh)'
+							className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.batterycapacity} />
+						</FormGroup>
+
+						<FormGroup
+							id='screenresolution'
+							label='Độ phân giải màng hình'
+							className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.screenresolution} />
+						</FormGroup>
+
+						<FormGroup id='typeofwarranty' label='Loại bảo hành' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.typeofwarranty} />
+						</FormGroup>
+						<FormGroup id='warrantyperiod' label='Hạn bảo hành' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.warrantyperiod} />
+						</FormGroup>
+						<FormGroup id='condition' label='Tình trạng ' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.condition} />
+						</FormGroup>
+						<FormGroup id='phonemodel' label='Model điện thoại' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.phonemodel} />
+						</FormGroup>
+
+						<FormGroup id='processor' label='Bộ xử lý' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.processor} />
+						</FormGroup>
+
+						<FormGroup id='ram' label='Ram' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.ram} />
+						</FormGroup>
+						<FormGroup id='rom' label='Rom' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.rom} />
+						</FormGroup>
+						<FormGroup
+							id='numberofsimslots'
+							label='Số khe cắm sim'
+							className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.numberofsimslots} />
+						</FormGroup>
+						<FormGroup
+							id='numberofmaincameras'
+							label='Số camera chính'
+							className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.numberofmaincameras} />
+						</FormGroup>
+
+						<FormGroup
+							id='phonefeature'
+							label='Tính năng điện thoại'
+							className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.phonefeature} />
+						</FormGroup>
+
+						<FormGroup id='typeofphone' label='Loại điện thoại' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.typeofphone} />
+						</FormGroup>
+						<FormGroup id='mobilephone' label='Điện thoại di động' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.mobilephone} />
+						</FormGroup>
+						<FormGroup id='operatingsystem' label='Hệ điều hành' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.operatingsystem} />
+						</FormGroup>
+						<FormGroup
+							id='typeoftelephonecable'
+							label='Loại cáp điện thoại'
+							className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.typeoftelephonecable} />
+						</FormGroup>
+
+						<FormGroup id='typeofsim' label='Loại sim' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.typeofsim} />
+						</FormGroup>
+
+						<FormGroup
+							id='screenprotectortype'
+							label='Loại miếng dáng bảo vệ màng hình'
+							className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.screenprotectortype} />
+						</FormGroup>
+						<FormGroup id='covertype' label='Loại Ốp' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.covertype} />
+						</FormGroup>
+
+						<FormGroup
+							id='dateofmanufacture'
+							label='Ngày sản xuất'
+							className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.dateofmanufacture} />
+						</FormGroup>
+					</div>
+
+					<div
+						style={{
+							fontSize: 20,
+							fontWeight: '500',
+							marginTop: 40,
+						}}>
+						Ví
+					</div>
+
+					<div className='row g-4 col-md-12'>
+						<FormGroup id='origin' label='Xuất xứ' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.origin} />
+						</FormGroup>
+						<FormGroup
+							id='detachablestrap'
+							label='Dây đeo tháo rời'
+							className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.detachablestrap} />
+						</FormGroup>
+						<FormGroup id='pocketlocktype' label='Loại khoá túi' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.pocketlocktype} />
+						</FormGroup>
+
+						<FormGroup id='skintexture' label='Kết cấu da' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.skintexture} />
+						</FormGroup>
+
+						<FormGroup id='skintype' label='Loại da' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.skintype} />
+						</FormGroup>
+
+						<FormGroup id='walletstyle' label='Kiểu ví' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.walletstyle} />
+						</FormGroup>
+
+						<FormGroup id='material' label='Chất liệu' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.material} />
+						</FormGroup>
+						<FormGroup id='typeofwarranty' label='Loại bảo hành' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.typeofwarranty} />
+						</FormGroup>
+						<FormGroup id='warrantyperiod' label='Hạn bảo hành' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.warrantyperiod} />
+						</FormGroup>
+					</div>
+
+					<div
+						style={{
+							fontSize: 20,
+							fontWeight: '500',
+							marginTop: 40,
+						}}>
+						Áo
+					</div>
+					<div className='row g-4 col-md-12'>
+						<FormGroup id='origin' label='Xuất xứ' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.origin} />
+						</FormGroup>
+						<FormGroup id='shirtlength' label='Chiều dài áo' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.shirtlength} />
+						</FormGroup>
+						<FormGroup id='sleevelenght' label='Chiều dài tay áo ' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.sleevelenght} />
+						</FormGroup>
+
+						<FormGroup id='collar' label='Cổ áo' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.collar} />
+						</FormGroup>
+
+						<FormGroup id='material' label='Chất liệu ' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.material} />
+						</FormGroup>
+
+						<FormGroup id='season' label='Mùa' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.season} />
+						</FormGroup>
+
+						<FormGroup id='sample' label='Mẫu' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.sample} />
+						</FormGroup>
+						<FormGroup id='style' label='Phong cách' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.style} />
+						</FormGroup>
+					</div>
+
+					<div
+						style={{
+							fontSize: 20,
+							fontWeight: '500',
+							marginTop: 40,
+						}}>
+						Quần
+					</div>
+					<div className='row g-4 col-md-12'>
+						<FormGroup id='origin' label='Xuất xứ' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.origin} />
+						</FormGroup>
+						<FormGroup id='pantslength' label='Chiều dài quần' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.pantslength} />
+						</FormGroup>
+						<FormGroup id='pantsstyle' label='Kiểu quần ' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.pantsstyle} />
+						</FormGroup>
+
+						<FormGroup id='material' label='Chất liệu' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.material} />
+						</FormGroup>
+
+						<FormGroup id='season' label='Mùa ' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.season} />
+						</FormGroup>
+
+						<FormGroup id='sample' label='Mẫu' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.sample} />
+						</FormGroup>
+
+						<FormGroup id='style' label='Phong cách' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.style} />
+						</FormGroup>
+					</div>
+
+					<div
+						style={{
+							fontSize: 20,
+							fontWeight: '500',
+							marginTop: 40,
+						}}>
+						Váy
+					</div>
+					<div className='row g-4 col-md-12'>
+						<FormGroup id='origin' label='Xuất xứ' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.origin} />
+						</FormGroup>
+						<FormGroup id='lengthofshoulder' label='Chiều dài vaý' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.lengthofshoulder} />
+						</FormGroup>
+						<FormGroup id='dressstyle' label='Kiểu váy ' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.dressstyle} />
+						</FormGroup>
+
+						<FormGroup id='material' label='Chất liệu' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.material} />
+						</FormGroup>
+
+						<FormGroup id='season' label='Mùa ' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.season} />
+						</FormGroup>
+
+						<FormGroup id='sample' label='Mẫu' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.sample} />
+						</FormGroup>
+
+						<FormGroup id='style' label='Phong cách' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.style} />
+						</FormGroup>
+					</div>
+
+					<div
+						style={{
+							fontSize: 20,
+							fontWeight: '500',
+							marginTop: 40,
+						}}>
+						Máy tính
+					</div>
+					<div className='row g-4 col-md-12'>
+						<FormGroup id='origin' label='Xuất xứ' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.origin} />
+						</FormGroup>
+						<FormGroup id='typeoflaptop' label='Loại laptop' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.typeoflaptop} />
+						</FormGroup>
+						<FormGroup
+							id='originofscreen'
+							label='Xuất xứ màng hình '
+							className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.originofscreen} />
+						</FormGroup>
+
+						<FormGroup
+							id='manufacturerofgraphicschips'
+							label='Nhà sản xuất chip đồ hoạ'
+							className='col-md-6'>
+							<Input
+								onChange={handleChange}
+								value={dataform.manufacturerofgraphicschips}
+							/>
+						</FormGroup>
+
+						<FormGroup id='laptopmodel' label='Laptop Model ' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.laptopmodel} />
+						</FormGroup>
+
+						<FormGroup
+							id='storagecapacity'
+							label='Dung lượng lưu trữ'
+							className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.storagecapacity} />
+						</FormGroup>
+
+						<FormGroup id='interfaceport' label='Cổng giao diện' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.interfaceport} />
+						</FormGroup>
+
+						<FormGroup id='processor' label='Bộ xử lý' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.processor} />
+						</FormGroup>
+
+						<FormGroup id='numberofcores' label='Số lõi' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.numberofcores} />
+						</FormGroup>
+
+						<FormGroup id='frequency' label='Tần số' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.frequency} />
+						</FormGroup>
+
+						<FormGroup id='operatingsystem' label='Hệ điều hành' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.operatingsystem} />
+						</FormGroup>
+
+						<FormGroup id='batterycapacity' label='Dung lượng pin' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.batterycapacity} />
+						</FormGroup>
+
+						<FormGroup id='opticaldisc' label='Ổ đĩa quang' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.opticaldisc} />
+						</FormGroup>
+
+						<FormGroup id='status' label='Tình trạng' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.status} />
+						</FormGroup>
+
+						<FormGroup id='warrantyperiod' label='Hạn bảo hành' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.warrantyperiod} />
+						</FormGroup>
+
+						<FormGroup id='typeofwarranty' label='Loại bảo hành' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.typeofwarranty} />
+						</FormGroup>
+
+						<FormGroup
+							id='dateofmanufacture'
+							label='Ngày sản xuất'
+							className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.dateofmanufacture} />
+						</FormGroup>
+					</div>
+
+					<div
+						style={{
+							fontSize: 20,
+							fontWeight: '500',
+							marginTop: 40,
+						}}>
+						Nước hoa
+					</div>
+					<div className='row g-4 col-md-12'>
+						<FormGroup id='origin' label='Xuất xứ' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.origin} />
+						</FormGroup>
+						<FormGroup id='gender' label='Giới tính' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.gender} />
+						</FormGroup>
+						<FormGroup id='ingredient' label='Thành phần ' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.ingredient} />
+						</FormGroup>
+
+						<FormGroup id='productsize' label='Kích cỡ sản phẩm' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.productsize} />
+						</FormGroup>
+
+						<FormGroup id='fragrant' label='Mùi hương ' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.fragrant} />
+						</FormGroup>
+
+						<FormGroup id='expiry' label='Hạn sử dụng' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.expiry} />
+						</FormGroup>
+
+						<FormGroup id='capacity' label='Dung tích' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.capacity} />
+						</FormGroup>
+						<FormGroup
+							id='flavorconcentration'
+							label='Nồng độ hương'
+							className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.flavorconcentration} />
+						</FormGroup>
+						<FormGroup id='recipe' label='Công thức' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.recipe} />
+						</FormGroup>
+						<FormGroup id='weight' label='Trọng lượng' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.weight} />
+						</FormGroup>
+					</div>
+
+					<div
+						style={{
+							fontSize: 20,
+							fontWeight: '500',
+							marginTop: 40,
+						}}>
+						Đồng hồ
+					</div>
+					<div className='row g-4 col-md-12'>
+						<FormGroup id='origin' label='Xuất xứ' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.origin} />
+						</FormGroup>
+						<FormGroup id='clockface' label='Mặt đồng hồ' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.clockface} />
+						</FormGroup>
+						<FormGroup id='watchstyle' label='Kiểu đồng hồ' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.watchstyle} />
+						</FormGroup>
+						<FormGroup id='typeofwarranty' label='Loại bảo hành' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.typeofwarranty} />
+						</FormGroup>
+
+						<FormGroup
+							id='diameterofwatchcase'
+							label='Đường kính vỏ đồng hồ'
+							className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.diameterofwatchcase} />
+						</FormGroup>
+
+						<FormGroup
+							id='watchcasestyle'
+							label='Kiểu vỏ đồng hồ '
+							className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.watchcasestyle} />
+						</FormGroup>
+
+						<FormGroup
+							id='watchcasematerial'
+							label='Chất liệu vỏ đồng hồ'
+							className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.watchcasematerial} />
+						</FormGroup>
+
+						<FormGroup
+							id='clocklockstyle'
+							label='Kiểu khoá đồng hồ'
+							className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.clocklockstyle} />
+						</FormGroup>
+						<FormGroup
+							id='strapmaterial'
+							label='Chất liệu dây đeo'
+							className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.strapmaterial} />
+						</FormGroup>
+						<FormGroup id='Feature' label='Tính năng' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.origin} />
+						</FormGroup>
+						<FormGroup
+							id='depthofwaterresistance'
+							label='Đọ sâu chống nước'
+							className='col-md-6'>
+							<Input
+								onChange={handleChange}
+								value={dataform.depthofwaterresistance}
+							/>
+						</FormGroup>
+
+						<FormGroup id='warrantyperiod' label='Hạn bảo hành' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.warrantyperiod} />
+						</FormGroup>
+
+						<FormGroup id='material' label='Chất liệu' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.material} />
+						</FormGroup>
+
+						<FormGroup id='skintype' label='Loại da' className='col-md-6'>
+							<Input onChange={handleChange} value={dataform.skintype} />
+						</FormGroup>
+					</div>
+
+					<div
+						style={{
+							fontSize: 20,
+							fontWeight: '500',
+							marginTop: 40,
+						}}>
+						Thông tin phân loại
 					</div>
 
 					{/* Color ------------------ */}
@@ -724,7 +1425,7 @@ const NewProduct = () => {
 									return (
 										<div
 											style={{
-												marginTop: 8,
+												marginTop: 24,
 												padding: '8px 16px',
 												borderWidth: 1,
 												borderStyle: 'dashed',
@@ -738,7 +1439,7 @@ const NewProduct = () => {
 													justifyContent: 'space-between',
 												}}>
 												<div>Color: {item.color}</div>
-												<div
+												{/* <div
 													style={{
 														cursor: 'pointer',
 														color: 'red',
@@ -749,7 +1450,7 @@ const NewProduct = () => {
 													role='button'
 													tabIndex='0'>
 													Edit
-												</div>
+												</div> */}
 											</div>
 
 											<div
@@ -765,10 +1466,12 @@ const NewProduct = () => {
 															display: 'flex',
 															justifyContent: 'center',
 															alignItems: 'center',
-															borderStyle: 'dashed',
+															borderStyle: item.thumbnailcolor
+																? 'none'
+																: 'dashed',
 															borderColor: '#E9E5E5',
 															backgroundImage: `url(${item.thumbnailcolor}`,
-															backgroundSize: 'cover',
+															backgroundSize: '100% 100%',
 															cursor: 'pointer',
 															'&:hover': {
 																opacity: 0.5,
@@ -777,8 +1480,88 @@ const NewProduct = () => {
 														}}
 													/>
 												</div>
-												<div style={{ display: 'flex', flexWrap: 'wrap' }}>
-													{item.sizeprice.map((i) => {
+												<div
+													style={{
+														display: 'flex',
+														flexWrap: 'wrap',
+														width: '100%',
+													}}>
+													{item.sizeprice && (
+														<CardBody
+															className='table-responsive'
+															isScrollable
+															style={{
+																paddingLeft: 0,
+																paddingRight: 0,
+																paddingTop: 0,
+																height: 250,
+																width: '100%',
+															}}>
+															<table className='table table-modern table-hover'>
+																<thead>
+																	<tr>
+																		<th scope='col'>
+																			Tên size
+																		</th>
+																		<th scope='col'>
+																			Giá size
+																		</th>
+																		<th scope='col'>
+																			Giá khuyến mãi
+																		</th>
+																		<th scope='col'>
+																			Số lượng
+																		</th>
+																	</tr>
+																</thead>
+																<tbody>
+																	{item.sizeprice?.map((i) => (
+																		// <CommonTableRow
+																		// 	key={i.id}
+																		// 	// eslint-disable-next-line react/jsx-props-no-spreading
+																		// 	{...i}
+																		// 	selectName='selectedList'
+																		// 	selectOnChange={selectTable.handleChange}
+																		// 	selectChecked={selectTable.values.selectedList.includes(
+																		// 		i.id.toString(),
+																		// 	)}
+																		// />
+																		<tr>
+																			<td>
+																				<span>
+																					{i.name}
+																				</span>
+																			</td>
+
+																			<td>
+																				<span>
+																					{ConvertVND(
+																						i.price,
+																					)}
+																				</span>
+																			</td>
+																			<td>
+																				<span>
+																					{ConvertVND(
+																						i.p_price,
+																					)}
+																				</span>
+																			</td>
+																			<td>
+																				<span>
+																					{ConvertVND(
+																						i.amount,
+																					)}
+																				</span>
+																			</td>
+																		</tr>
+																	))}
+																</tbody>
+															</table>
+														</CardBody>
+													)}
+
+													{/* {item.sizeprice.map((i) => {
 														return (
 															<div
 																style={{
@@ -798,7 +1581,7 @@ const NewProduct = () => {
 																- {i.amount}
 															</div>
 														);
-													})}
+													})} */}
 												</div>
 											</div>
 											<div
@@ -808,21 +1591,47 @@ const NewProduct = () => {
 												tabIndex='0'
 												style={{
 													position: 'absolute',
-													top: -4,
-													right: -4,
+													top: -10,
+													right: 0,
 													color: 'red',
 													zIndex: 1,
 													fontSize: 10,
 													display: 'flex',
 													justifyContent: 'center',
 													alignItems: 'center',
-													width: 10,
-													height: 10,
+													width: 20,
+													height: 20,
+													padding: 2,
 													borderRadius: 50,
 													backgroundColor: '#FBECE9',
 													cursor: 'pointer',
 												}}>
-												x
+												<Icon icon='delete' style={{ fontSize: 30 }} />
+											</div>
+
+											<div
+												onClick={() => editArrColor(item)}
+												onKeyDown={() => editArrColor(item)}
+												role='button'
+												tabIndex='0'
+												style={{
+													position: 'absolute',
+													top: -10,
+													right: 32,
+													color: 'red',
+													zIndex: 1,
+													fontSize: 10,
+													display: 'flex',
+													justifyContent: 'center',
+													alignItems: 'center',
+													width: 20,
+													height: 20,
+													padding: 2,
+													borderRadius: 50,
+													backgroundColor: '#FBECE9',
+													cursor: 'pointer',
+												}}>
+												<Icon icon='edit' style={{ fontSize: 30 }} />
 											</div>
 										</div>
 									);
@@ -1001,12 +1810,78 @@ const NewProduct = () => {
 						)}
 					</div>
 
+					<div
+						style={{
+							fontSize: 20,
+							fontWeight: '500',
+							marginTop: 40,
+						}}>
+						Thông tin vận chuyển
+					</div>
+
+					<div className='row g-4 col-md-12'>
+						{/* <div className='col-md-3'> */}
+						<FormGroup id='usagestatus' label='Tình trạng' className='col-md-6'>
+							<Select
+								ariaLabel='Tình trạng'
+								placeholder='Chọn tình trạng'
+								list={selectUsagestatus}
+								onChange={handleChange}
+								value={dataform.usagestatus}
+								isValid={dataform.usagestatus}
+								isTouched={dataform.usagestatus}
+							/>
+						</FormGroup>
+						<FormGroup id='weight' label='Cân nặng' className='col-md-6'>
+							<Input onChange={handleChange} type='number' value='1' />
+						</FormGroup>
+						{/* </div>
+						<div className='col-md-3'> */}
+						<FormGroup
+							id='weight'
+							label='Kích thước đóng gói ( X )'
+							className='col-md-6'>
+							<Input onChange={handleChange} type='number' value='1' />
+						</FormGroup>
+						{/* </div>
+						<div className='col-md-3'> */}
+						<FormGroup
+							id='weight'
+							label='Kích thước đóng gói ( Y )'
+							className='col-md-6'>
+							<Input onChange={handleChange} type='number' value='1' />
+						</FormGroup>
+						{/* </div>
+						<div className='col-md-3'> */}
+						<FormGroup
+							id='weight'
+							label='Kích thước đóng gói ( Z )'
+							className='col-md-6'>
+							<Input onChange={handleChange} type='number' value='1' />
+						</FormGroup>
+						<FormGroup
+							id='deliverymethod'
+							label='Phương pháp vận chuyển'
+							className='col-md-6'>
+							<Select
+								ariaLabel='Phương pháp vận chuyển'
+								placeholder='Chọn Phương pháp vận chuyển'
+								list={selectDeliverymethodList}
+								onChange={handleChange}
+								value={dataform.deliverymethod}
+								isValid={dataform.deliverymethod}
+								isTouched={dataform.deliverymethod}
+							/>
+						</FormGroup>
+						{/* </div> */}
+					</div>
+
 					<div />
 					{/* Thumbnail------------- */}
 				</div>
 				<div className='mt-3' style={{ display: 'flex', justifyContent: 'flex-end' }}>
 					{isPostProduct === 'fail' && (
-						<p style={{ fontSize: 14, color: 'red' }}> Tao moi that bai</p>
+						<p style={{ fontSize: 14, color: 'red' }}> Tạo mới thất bại</p>
 					)}
 					<Button color='info' className='col-md-3' onClick={() => postProductFrom()}>
 						New Product
@@ -1036,7 +1911,7 @@ const NewProduct = () => {
 										justifyContent: 'center',
 										alignItems: 'center',
 										borderWidth: thumbnailColorVitural ? 0 : 1,
-										borderStyle: 'dashed',
+										borderStyle: thumbnailColorVitural ? 'none' : 'dashed',
 										borderColor: '#E9E5E5',
 										backgroundImage: `url(${thumbnailColorVitural}`,
 										backgroundSize: 'cover',
@@ -1085,6 +1960,7 @@ const NewProduct = () => {
 												alignItems: 'center',
 												width: 20,
 												height: 20,
+												padding: 2,
 												borderRadius: 50,
 												backgroundColor: '#FBECE9',
 												cursor: 'pointer',
@@ -1141,24 +2017,26 @@ const NewProduct = () => {
 											style={{
 												position: 'absolute',
 												top: -4,
-												right: -4,
+												right: -10,
 												color: 'red',
 												zIndex: 1,
 												fontSize: 10,
 												display: 'flex',
 												justifyContent: 'center',
 												alignItems: 'center',
-												width: 10,
-												height: 10,
+												width: 20,
+												height: 20,
+												padding: 2,
 												borderRadius: 50,
 												backgroundColor: '#FBECE9',
 												cursor: 'pointer',
 											}}>
-											x
+											<Icon icon='delete' style={{ fontSize: 30 }} />
 										</div>
 									</div>
 									<FormGroup id='priceSizeVitural' style={{ marginRight: 8 }}>
 										<Input
+											type='number'
 											placeholder='Price size'
 											onChange={(e) => setPriceSizeVitural(e.target.value)}
 											value={priceSizeVitural}
@@ -1169,14 +2047,25 @@ const NewProduct = () => {
 										style={{ marginRight: 8 }}>
 										<Input
 											placeholder='Price promotion'
-											onChange={(e) =>
-												setPriceSizePromotionVitural(e.target.value)
-											}
+											type='number'
+											onChange={(e) => {
+												setErrorPricePromotionVitural(
+													(parseInt(priceSizePromotionVitural, 10) >
+														parseInt(priceSizeVitural, 10) &&
+														true) ||
+														false,
+												);
+												setPriceSizePromotionVitural(e.target.value);
+											}}
+											style={{
+												color: errorPricePromotionVitural ? 'red' : 'black',
+											}}
 											value={priceSizePromotionVitural}
 										/>
 									</FormGroup>
 									<FormGroup id='amountVitural' style={{ marginRight: 8 }}>
 										<Input
+											type='number'
 											placeholder='Amount'
 											onChange={handleAmountVitural}
 											value={amountVitural}
@@ -1184,7 +2073,7 @@ const NewProduct = () => {
 									</FormGroup>
 
 									<Icon
-										icon='ArrowForward'
+										icon='Plus'
 										style={{
 											fontSize: 24,
 											marginLeft: 16,
@@ -1196,71 +2085,73 @@ const NewProduct = () => {
 								</div>
 							)}
 							{arrSizePriceVitural.length > 0 && (
-								<div
-									style={{
-										display: 'flex',
-										marginTop: 8,
-										padding: '8px 16px',
-										borderWidth: 1,
-										borderStyle: 'dashed',
-										borderRadius: 10,
-										borderColor: '#E9E5E5',
-										alignItems: 'center',
-										flexWrap: 'wrap',
-									}}>
-									{arrSizePriceVitural.map((item) => {
-										return (
-											<div
-												style={{
-													padding: '4px 8px',
-													borderRadius: 4,
-													backgroundColor: '#FBECE9',
-													display: 'flex',
-													justifyContent: 'center',
-													alignItems: 'center',
-													marginRight: 4,
-													marginTop: 4,
-													fontSize: 12,
-													position: 'relative',
-												}}>
-												{item.name} - {item.price}đ - {item.p_price}đ -{' '}
-												{item.amount}
-												<div
-													onClick={() =>
-														deleteArrSizePriceVitural(item.name)
-													}
-													onKeyDown={() =>
-														deleteArrSizePriceVitural(item.name)
-													}
-													role='button'
-													tabIndex='0'
-													style={{
-														position: 'absolute',
-														top: -4,
-														right: -4,
-														color: 'red',
-														zIndex: 1,
-														fontSize: 10,
-														display: 'flex',
-														justifyContent: 'center',
-														alignItems: 'center',
-														width: 10,
-														height: 10,
-														borderRadius: 50,
-														backgroundColor: '#FBECE9',
-														cursor: 'pointer',
-													}}>
-													x
-												</div>
-											</div>
-										);
-									})}
-								</div>
+								<CardBody
+									className='table-responsive'
+									isScrollable
+									style={{ paddingLeft: 0, paddingRight: 0, height: 250 }}>
+									<table className='table table-modern table-hover'>
+										<thead>
+											<tr>
+												<th scope='col'>Tên size</th>
+												<th scope='col'>Giá size</th>
+												<th scope='col'>Giá khuyến mãi</th>
+												<th scope='col'>Số lượng</th>
+												<th scope='col' className='text-end'>
+													Actions
+												</th>
+											</tr>
+										</thead>
+										<tbody>
+											{arrSizePriceVitural?.map((item) => (
+												// <CommonTableRow
+												// 	key={i.id}
+												// 	// eslint-disable-next-line react/jsx-props-no-spreading
+												// 	{...i}
+												// 	selectName='selectedList'
+												// 	selectOnChange={selectTable.handleChange}
+												// 	selectChecked={selectTable.values.selectedList.includes(
+												// 		i.id.toString(),
+												// 	)}
+												// />
+												<tr>
+													<td>
+														<span>{item.name}</span>
+													</td>
+
+													<td>
+														<span>{ConvertVND(item.price)}</span>
+													</td>
+													<td>
+														<span>{ConvertVND(item.p_price)}</span>
+													</td>
+													<td>
+														<span>{ConvertVND(item.amount)}</span>
+													</td>
+
+													<td className='text-end'>
+														<Button
+															color='dark'
+															isLight
+															icon='delete'
+															tag='a'
+															onClick={() =>
+																deleteArrSizePriceVitural(item.name)
+															}
+														/>
+													</td>
+												</tr>
+											))}
+										</tbody>
+									</table>
+								</CardBody>
 							)}
 						</div>
 					</div>
 				</ModalBody>
 				<ModalFooter className='px-4 pb-4'>
+					{errorSaveColor && (
+						<p style={{ fontSize: 14, color: 'red' }}> {errorSaveColor}</p>
+					)}
 					<Button color='info' onClick={() => saveColor()}>
 						Save
 					</Button>
@@ -1290,7 +2181,7 @@ const NewProduct = () => {
 										justifyContent: 'center',
 										alignItems: 'center',
 										borderWidth: thumbnailColorVitural ? 0 : 1,
-										borderStyle: 'dashed',
+										borderStyle: thumbnailColorVitural ? 'none' : 'dashed',
 										borderColor: '#E9E5E5',
 										backgroundImage: `url(${thumbnailColorVitural}`,
 										backgroundSize: 'cover',
@@ -1395,20 +2286,21 @@ const NewProduct = () => {
 											style={{
 												position: 'absolute',
 												top: -4,
-												right: -4,
+												right: -10,
 												color: 'red',
 												zIndex: 1,
 												fontSize: 10,
 												display: 'flex',
 												justifyContent: 'center',
 												alignItems: 'center',
-												width: 10,
-												height: 10,
+												width: 20,
+												height: 20,
+												padding: 2,
 												borderRadius: 50,
 												backgroundColor: '#FBECE9',
 												cursor: 'pointer',
 											}}>
-											x
+											<Icon icon='delete' style={{ fontSize: 30 }} />
 										</div>
 									</div>
 									<FormGroup id='priceSizeVitural' style={{ marginRight: 8 }}>
@@ -1418,29 +2310,40 @@ const NewProduct = () => {
 											value={priceSizeVitural}
 										/>
 									</FormGroup>
+
 									<FormGroup
 										id='priceSizePromotionVitural'
 										style={{ marginRight: 8 }}>
 										<Input
 											placeholder='Price promotion'
-											onChange={(e) =>
-												setPriceSizePromotionVitural(e.target.value)
-											}
+											type='number'
+											onChange={(e) => {
+												setErrorPricePromotionVitural(
+													(parseInt(priceSizePromotionVitural, 10) >
+														parseInt(priceSizeVitural, 10) &&
+														true) ||
+														false,
+												);
+												setPriceSizePromotionVitural(e.target.value);
+											}}
+											style={{
+												color: errorPricePromotionVitural ? 'red' : 'black',
+											}}
 											value={priceSizePromotionVitural}
 										/>
 									</FormGroup>
-									<FormGroup
-										id='amountVitural'
-										label='Amount'
-										className='col-md-3'>
+
+									<FormGroup id='amountVitural' style={{ marginRight: 8 }}>
 										<Input
+											type='number'
+											placeholder='Amount'
 											onChange={handleAmountVitural}
 											value={amountVitural}
 										/>
 									</FormGroup>
 
 									<Icon
-										icon='ArrowForward'
+										icon='Plus'
 										style={{
 											fontSize: 24,
 											marginLeft: 16,
@@ -1452,65 +2355,124 @@ const NewProduct = () => {
 								</div>
 							)}
 							{arrSizePriceVitural.length > 0 && (
-								<div
-									style={{
-										display: 'flex',
-										marginTop: 8,
-										padding: '8px 16px',
-										borderWidth: 1,
-										borderStyle: 'dashed',
-										borderRadius: 10,
-										borderColor: '#E9E5E5',
-										alignItems: 'center',
-										flexWrap: 'wrap',
-									}}>
-									{arrSizePriceVitural.map((item) => {
-										return (
-											<div
-												style={{
-													padding: 4,
-													borderRadius: 4,
-													backgroundColor: '#FBECE9',
-													display: 'flex',
-													justifyContent: 'center',
-													alignItems: 'center',
-													marginRight: 4,
-													marginTop: 4,
-													fontSize: 12,
-													position: 'relative',
-												}}>
-												{item.name} - {item.price}đ - {item.p_price}đ
-												<div
-													onClick={() =>
-														deleteArrSizePriceVitural(item.name)
-													}
-													onKeyDown={() =>
-														deleteArrSizePriceVitural(item.name)
-													}
-													role='button'
-													tabIndex='0'
-													style={{
-														position: 'absolute',
-														top: -4,
-														right: -4,
-														color: 'red',
-														zIndex: 1,
-														fontSize: 10,
-														display: 'flex',
-														justifyContent: 'center',
-														alignItems: 'center',
-														width: 10,
-														height: 10,
-														borderRadius: 50,
-														backgroundColor: '#FBECE9',
-														cursor: 'pointer',
-													}}>
-													x
-												</div>
-											</div>
-										);
-									})}
-								</div>
+								<CardBody
+									className='table-responsive'
+									isScrollable
+									style={{ paddingLeft: 0, paddingRight: 0, height: 250 }}>
+									<table className='table table-modern table-hover'>
+										<thead>
+											<tr>
+												<th scope='col'>Tên size</th>
+												<th scope='col'>Giá size</th>
+												<th scope='col'>Giá khuyến mãi</th>
+												<th scope='col'>Số lượng</th>
+												<th scope='col' className='text-end'>
+													Actions
+												</th>
+											</tr>
+										</thead>
+										<tbody>
+											{arrSizePriceVitural?.map((item) => (
+												// <CommonTableRow
+												// 	key={i.id}
+												// 	// eslint-disable-next-line react/jsx-props-no-spreading
+												// 	{...i}
+												// 	selectName='selectedList'
+												// 	selectOnChange={selectTable.handleChange}
+												// 	selectChecked={selectTable.values.selectedList.includes(
+												// 		i.id.toString(),
+												// 	)}
+												// />
+												<tr>
+													<td>
+														<span>{item.name}</span>
+													</td>
+
+													<td>
+														<span>{ConvertVND(item.price)}</span>
+													</td>
+													<td>
+														<span>{ConvertVND(item.p_price)}</span>
+													</td>
+													<td>
+														<span>{ConvertVND(item.amount)}</span>
+													</td>
+
+													<td className='text-end'>
+														<Button
+															color='dark'
+															isLight
+															icon='delete'
+															tag='a'
+															onClick={() =>
+																deleteArrSizePriceVitural(item.name)
+															}
+														/>
+													</td>
+												</tr>
+											))}
+										</tbody>
+									</table>
+								</CardBody>
+								// <div
+								// 	style={{
+								// 		display: 'flex',
+								// 		marginTop: 8,
+								// 		padding: '8px 16px',
+								// 		borderWidth: 1,
+								// 		borderStyle: 'dashed',
+								// 		borderRadius: 10,
+								// 		borderColor: '#E9E5E5',
+								// 		alignItems: 'center',
+								// 		flexWrap: 'wrap',
+								// 	}}>
+								// 	{arrSizePriceVitural.map((item) => {
+								// 		return (
+								// 			<div
+								// 				style={{
+								// 					padding: 4,
+								// 					borderRadius: 4,
+								// 					backgroundColor: '#FBECE9',
+								// 					display: 'flex',
+								// 					justifyContent: 'center',
+								// 					alignItems: 'center',
+								// 					marginRight: 4,
+								// 					marginTop: 4,
+								// 					fontSize: 12,
+								// 					position: 'relative',
+								// 				}}>
+								// 				{item.name} - {item.price}đ - {item.p_price}đ
+								// 				<div
+								// 					onClick={() =>
+								// 						deleteArrSizePriceVitural(item.name)
+								// 					}
+								// 					onKeyDown={() =>
+								// 						deleteArrSizePriceVitural(item.name)
+								// 					}
+								// 					role='button'
+								// 					tabIndex='0'
+								// 					style={{
+								// 						position: 'absolute',
+								// 						top: -4,
+								// 						right: -4,
+								// 						color: 'red',
+								// 						zIndex: 1,
+								// 						fontSize: 10,
+								// 						display: 'flex',
+								// 						justifyContent: 'center',
+								// 						alignItems: 'center',
+								// 						width: 10,
+								// 						height: 10,
+								// 						borderRadius: 50,
+								// 						backgroundColor: '#FBECE9',
+								// 						cursor: 'pointer',
+								// 					}}>
+								// 					x
+								// 				</div>
+								// 			</div>
+								// 		);
+								// 	})}
+								// </div>
 							)}
 						</div>
 					</div>
@@ -1551,7 +2513,9 @@ const NewProduct = () => {
 										justifyContent: 'center',
 										alignItems: 'center',
 										borderWidth: thumbnailDescriptionVitural ? 0 : 1,
-										borderStyle: 'dashed',
+										borderStyle: thumbnailDescriptionVitural
+											? 'none'
+											: 'dashed',
 										borderColor: '#E9E5E5',
 										backgroundImage: `url(${thumbnailDescriptionVitural}`,
 										backgroundSize: 'cover',

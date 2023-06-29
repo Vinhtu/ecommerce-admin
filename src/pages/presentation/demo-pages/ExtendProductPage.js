@@ -14,6 +14,8 @@ import BrandComponent from '../../common/BrandComponent';
 import ColorComponent from '../../common/ColorComponent';
 import SizeComponent from '../../common/SizeComponent';
 import CategoryComponent from '../../common/CategoryComponent';
+import UsageStatusComponent from '../../common/UsageStatusComponent';
+import DeliveryMethodComponent from '../../common/DeliveryMethodComponent';
 
 const ExtendProductPage = () => {
 	const [isTag, setIsTag] = React.useState('category');
@@ -47,6 +49,12 @@ const ExtendProductPage = () => {
 						<Button color='info' isLight onClick={() => setIsTag('categorytree')}>
 							Category Tree
 						</Button>{' '}
+						<Button color='info' isLight onClick={() => setIsTag('usagestatus')}>
+							Tình trạng
+						</Button>{' '}
+						<Button color='info' isLight onClick={() => setIsTag('deliverymethod')}>
+							Phương pháp vận chuyển
+						</Button>{' '}
 					</span>
 				</SubHeaderLeft>
 				<SubHeaderRight>
@@ -75,7 +83,8 @@ const ExtendProductPage = () => {
 				{isTag === 'color' && <ColorComponent isFluid />}
 				{isTag === 'size' && <SizeComponent isFluid />}
 				{isTag === 'categorytree' && <CategoryTreeComponent isFluid />}
-
+				{isTag === 'usagestatus' && <UsageStatusComponent isFluid />}
+				{isTag === 'deliverymethod' && <DeliveryMethodComponent isFluid />}
 			</Page>
 		</PageWrapper>
 	);

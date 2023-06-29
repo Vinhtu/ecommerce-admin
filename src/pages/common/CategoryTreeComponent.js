@@ -106,6 +106,7 @@ const CategoryTreeComponent = ({ isFluid }) => {
 	const [dataform, setDataForm] = React.useState({
 		_id: '',
 		name: '',
+		code: '',
 		type: '',
 		show: '',
 		image: '',
@@ -116,6 +117,7 @@ const CategoryTreeComponent = ({ isFluid }) => {
 	const [dataformedit, setDataFormEdit] = React.useState({
 		_id: '',
 		name: '',
+		code: '',
 		type: '',
 		show: '',
 		image: '',
@@ -127,6 +129,7 @@ const CategoryTreeComponent = ({ isFluid }) => {
 			...dataformedit,
 			_id: item._id,
 			name: item.name,
+			code: item.code,
 			type: item.type,
 			show: item.show,
 			image: item.image,
@@ -140,12 +143,12 @@ const CategoryTreeComponent = ({ isFluid }) => {
 		setDataFormEdit({ ...dataformedit, [event.target.id]: event.target.value });
 	};
 
-
 	const openDeleteCategory = (item) => {
 		setDataForm({
 			...dataform,
 			_id: item._id,
 			name: item.name,
+			code: item.code,
 			type: item.type,
 			show: item.show,
 			image: item.image,
@@ -297,6 +300,7 @@ const CategoryTreeComponent = ({ isFluid }) => {
 										icon='FilterList'
 									/>
 								</th>
+								<th>Code</th>
 								<th>Name</th>
 								<th>Amount Sub Category</th>
 								<th>Type</th>
@@ -327,6 +331,11 @@ const CategoryTreeComponent = ({ isFluid }) => {
 											<span className='text-nowrap'>
 												{moment(`${item.create_date}`).format('YYYY-MM-DD')}
 											</span>
+										</div>
+									</td>
+									<td>
+										<div>
+											<div>{item.code}</div>
 										</div>
 									</td>
 									<td>
@@ -410,6 +419,11 @@ const CategoryTreeComponent = ({ isFluid }) => {
 									value={dataform.create_date}
 									type='date'
 								/>
+							</FormGroup>
+						</div>
+						<div className='col-12'>
+							<FormGroup id='code' label='Code'>
+								<Input onChange={handleChangeCategory} value={dataform.code} />
 							</FormGroup>
 						</div>
 						<div className='col-12'>
@@ -633,6 +647,11 @@ const CategoryTreeComponent = ({ isFluid }) => {
 							</FormGroup>
 						</div>
 						<div className='col-12'>
+							<FormGroup id='code' label='Code'>
+								<Input onChange={handleEditForm} value={dataformedit.code} />
+							</FormGroup>
+						</div>
+						<div className='col-12'>
 							<FormGroup id='name' label='Name'>
 								<Input onChange={handleEditForm} value={dataformedit.name} />
 							</FormGroup>
@@ -824,10 +843,10 @@ const CategoryTreeComponent = ({ isFluid }) => {
 				</OffCanvasBody>
 				<div className='row m-0'>
 					<div className='col-12 p-3'>
-					{isPutCategory === 'fail' && (
+						{isPutCategory === 'fail' && (
 							<p style={{ fontSize: 14, color: 'red' }}> Edit that bai</p>
 						)}
-					
+
 						<Button color='info' className='w-100' onClick={() => editCategory()}>
 							Save
 						</Button>
@@ -854,6 +873,11 @@ const CategoryTreeComponent = ({ isFluid }) => {
 									type='date'
 									disabled
 								/>
+							</FormGroup>
+						</div>
+						<div className='col-12'>
+							<FormGroup id='code' label='Code'>
+								<Input onChange={handleEditForm} value={dataform.code} disabled />
 							</FormGroup>
 						</div>
 						<div className='col-12'>
